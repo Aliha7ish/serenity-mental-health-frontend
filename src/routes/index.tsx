@@ -15,9 +15,9 @@ import { Footer } from "@/components/landing/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MindCare AI — Bloom into the life you deserve" },
+      { title: "Serenity — Bloom into the life you deserve" },
       { name: "description", content: "Compassionate, confidential, AI-powered emotional support, available 24/7. A safe space to grow, heal, and bloom." },
-      { property: "og:title", content: "MindCare AI — Bloom into the life you deserve" },
+      { property: "og:title", content: "Serenity — Bloom into the life you deserve" },
       { property: "og:description", content: "Compassionate, confidential, AI-powered emotional support, available 24/7." },
     ],
   }),

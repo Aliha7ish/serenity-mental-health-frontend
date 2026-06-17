@@ -4,7 +4,7 @@ import { SectionHeader, FadeIn } from "./Section";
 const features = [
   { icon: Brain, title: "Emotion Detection", text: "Understands your emotional tone and meets you where you are." },
   { icon: MessageCircleHeart, title: "Personalized Conversations", text: "Responds with empathy, context, and care." },
-  { icon: Mic, title: "Voice Interaction", text: "Speak naturally with MindCare AI when typing feels like too much." },
+  { icon: Mic, title: "Voice Interaction", text: "Speak naturally with Serenity when typing feels like too much." },
   { icon: ShieldAlert, title: "Crisis Support", text: "Immediate guidance and trusted safety resources when it matters most." },
   { icon: History, title: "Conversation History", text: "Revisit your reflections and notice how far you've grown." },
   { icon: Globe, title: "Multi-Language Support", text: "Get support in the language that feels most like home." },

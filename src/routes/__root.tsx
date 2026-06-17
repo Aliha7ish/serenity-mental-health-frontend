@@ -67,10 +67,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "MindCare AI — Bloom into the life you deserve" },
+      { title: "Serenity — Bloom into the life you deserve" },
       { name: "description", content: "Compassionate, confidential, AI-powered emotional support, available 24/7. A safe space to grow, heal, and bloom." },
-      { name: "author", content: "MindCare AI" },
-      { property: "og:title", content: "MindCare AI — Bloom into the life you deserve" },
+      { name: "Ali Hashish", content: "Serenity" },
+      { property: "og:title", content: "Serenity — Bloom into the life you deserve" },
       { property: "og:description", content: "Compassionate, confidential, AI-powered emotional support, available 24/7." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

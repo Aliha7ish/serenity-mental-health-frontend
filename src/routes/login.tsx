@@ -10,8 +10,8 @@ import authBloom from "@/assets/auth-bloom.png";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign In — MindCare AI" },
-      { name: "description", content: "Sign in to MindCare AI and continue your journey toward growth and emotional wellness." },
+      { title: "Sign In — Serenity" },
+      { name: "description", content: "Sign in to Serenity and continue your journey toward growth and emotional wellness." },
     ],
   }),
   component: LoginPage,
