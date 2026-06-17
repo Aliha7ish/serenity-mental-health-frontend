@@ -1,3 +1,5 @@
+import { login } from "@/lib/api/auth.functions";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Github, Eye, EyeOff } from "lucide-react";
@@ -6,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import authBloom from "@/assets/auth-bloom.png";
+
+const navigate = useNavigate();
+
+const [error,setError] = useState("");
+const [loading,setLoading] = useState(false);
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -46,9 +53,52 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e:React.FormEvent)=>{
+
     e.preventDefault();
-  };
+
+    setError("");
+    setLoading(true);
+
+
+    try{
+
+        const response = await login({
+            username: email,
+            password
+        });
+
+
+        console.log(response);
+
+
+        // store JWT
+        localStorage.setItem(
+            "access_token",
+            response.access_token
+        );
+
+
+        navigate({
+            to:"/chat"
+        });
+
+
+    }catch(err:any){
+
+        setError(
+            err?.message ||
+            "Invalid credentials"
+        );
+
+
+    }finally{
+
+        setLoading(false);
+
+    }
+
+}
 
   return (
     <div className="flex min-h-dvh w-full">
@@ -167,9 +217,17 @@ function LoginPage() {
 
             <Button
               type="submit"
-              className="h-11 w-full rounded-full bg-gradient-bloom text-base font-semibold text-white shadow-soft hover:opacity-90"
-            >
-              Sign In
+              disabled={loading}
+              className="..."
+              >
+              {
+              loading
+              ?
+              "Signing in..."
+              :
+              "Sign In"
+              }
+
             </Button>
           </form>
 
@@ -211,6 +269,13 @@ function LoginPage() {
               Create account
             </Link>
           </p>
+
+          {error && (
+            <p className="mt-3 text-sm text-red-500">
+              {error}
+            </p>
+            )}
+            
         </div>
       </div>
     </div>

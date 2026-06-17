@@ -1,3 +1,4 @@
+import { register } from "@/lib/api/auth.functions";
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
@@ -101,29 +102,69 @@ function RegisterPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setStatus(null);
 
-    const validationErrors = validate(form);
-    setErrors(validationErrors);
+  const validationErrors = validate(form);
+  setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length > 0) {
-      setStatus({ type: "error", message: "Please fix the errors below and try again." });
-      return;
-    }
+  if (Object.keys(validationErrors).length > 0) {
+    setStatus({
+      type: "error",
+      message: "Please fix the errors below and try again.",
+    });
+    return;
+  }
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    // Simulated request — swap for a real API call once the backend is connected.
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setStatus({
-        type: "success",
-        message: `Welcome, ${form.firstName}! Your account has been created successfully.`,
-      });
-    }, 1100);
-  };
+  try {
+
+    const response = await register({
+      username: form.username,
+      email: form.email,
+      password: form.password,
+
+      country: form.country,
+      first_name: form.firstName,
+      last_name: form.lastName,
+    });
+
+
+    setStatus({
+      type: "success",
+      message:
+        `Welcome, ${form.firstName}! Your account has been created successfully.`,
+    });
+
+
+    console.log("Register response:", response);
+
+
+    // optional:
+    // navigate to login page after success
+    // router.navigate({to:"/login"})
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setStatus({
+      type:"error",
+      message:
+        error instanceof Error
+        ? error.message
+        : "Registration failed. Please try again."
+    });
+
+  } finally {
+
+    setIsSubmitting(false);
+
+  }
+};
 
   return (
     <div className="flex min-h-dvh w-full">
