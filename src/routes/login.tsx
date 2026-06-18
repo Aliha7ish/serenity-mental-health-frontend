@@ -73,8 +73,16 @@ function LoginPage() {
 
         // store JWT
         localStorage.setItem(
-            "access_token",
-            response.access_token
+          "access_token",
+          response.access_token
+        );
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            username: response.username,
+            full_name: response.full_name
+          })
         );
 
 
@@ -118,14 +126,17 @@ function LoginPage() {
               “Growth begins when you decide to take the first step.”
             </p>
           </blockquote>
-          <div className="mt-6 flex items-center gap-1 text-sm text-foreground/60">
-            <img 
-              src={serenityIcon} 
-              alt="" 
-              className="h-18 w-18 object-contain" 
+          <Link
+            to="/"
+            className="mt-6 flex items-center gap-1 text-sm text-foreground/60 transition-opacity hover:opacity-80"
+          >
+            <img
+              src={serenityIcon}
+              alt=""
+              className="h-18 w-18 object-contain"
             />
             <span className="-ml-3">Serenity</span>
-          </div>
+          </Link>
         </div>
         {/* Decorative floating petals */}
         <div className="absolute bottom-10 left-10 h-16 w-16 rounded-full bg-sunflower/20 blur-2xl animate-float-leaf" />
@@ -136,14 +147,17 @@ function LoginPage() {
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 sm:px-12 lg:px-20">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="mt-6 flex items-center gap-1 text-sm text-foreground/60">
-            <img 
-              src={serenityIcon} 
-              alt="" 
-              className="h-18 w-18 object-contain" 
+          <Link
+            to="/"
+            className="mt-6 flex items-center gap-1 text-sm text-foreground/60 transition-opacity hover:opacity-80"
+          >
+            <img
+              src={serenityIcon}
+              alt=""
+              className="h-18 w-18 object-contain"
             />
             <span className="-ml-3">Serenity</span>
-          </div>
+          </Link>
 
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">
             Welcome back

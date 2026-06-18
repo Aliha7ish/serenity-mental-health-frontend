@@ -3,6 +3,8 @@ import { Menu, X } from "lucide-react";
 import serenityIcon from "@/assets/serenity-icon.png";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { getUser, clearAuth } from "@/lib/auth";
+import { useNavigate } from "@tanstack/react-router";
 
 const links = [
   { href: "#benefits", label: "Benefits" },
@@ -15,6 +17,18 @@ const links = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const user = getUser();
+
+  const handleLogout = () => {
+
+    clearAuth();
+
+    navigate({
+      to:"/"
+    });
+
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -51,13 +65,52 @@ export function Navbar() {
           ))}
         </ul>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-3 md:flex">
+
+          {
+          user ? (
+
+          <>
+            <span className="text-sm font-medium">
+              Welcome, {user.full_name || user.username} 🌸
+            </span>
+
+            <Button
+              variant="ghost"
+              className="rounded-full"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+
+          </>
+
+          ) : (
+
+          <>
+
           <Button variant="ghost" className="rounded-full" asChild>
-            <Link to="/login">Sign in</Link>
+            <Link to="/login">
+              Sign in
+            </Link>
           </Button>
-          <Button className="rounded-full bg-gradient-bloom text-white shadow-soft hover:opacity-90" asChild>
-            <Link to="/register">Start your journey</Link>
+
+
+          <Button
+          className="rounded-full bg-gradient-bloom text-white shadow-soft hover:opacity-90"
+          asChild
+          >
+          <Link to="/register">
+          Start your journey
+          </Link>
           </Button>
+
+          </>
+
+          )
+
+          }
+
         </div>
 
         <button
@@ -80,12 +133,34 @@ export function Navbar() {
               </li>
             ))}
             <li className="mt-2 flex gap-2">
+              {
+              user ? (
+
+              <Button
+              className="flex-1 rounded-full"
+              onClick={handleLogout}
+              >
+              Logout
+              </Button>
+
+              )
+
+              :
+
+              (
+              <>
               <Button variant="outline" className="flex-1 rounded-full" asChild>
-                <Link to="/login">Sign in</Link>
+              <Link to="/login">Sign in</Link>
               </Button>
+
               <Button className="flex-1 rounded-full bg-gradient-bloom text-white" asChild>
-                <Link to="/register">Start</Link>
+              <Link to="/register">Start</Link>
               </Button>
+              </>
+
+              )
+
+              }
             </li>
           </ul>
         </div>

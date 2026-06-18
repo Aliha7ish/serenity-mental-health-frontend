@@ -6,3 +6,16 @@ export function isAuthenticated() {
     return false;
   }
 }
+
+export function getUser() {
+  const user = localStorage.getItem("user");
+
+  if (!user) return null;
+
+  return JSON.parse(user);
+}
+
+export function clearAuth() {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("user");
+}
