@@ -35,18 +35,14 @@ export const Route = createFileRoute("/chat")({
 
   beforeLoad: () => {
 
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("access_token")
-        : null;
+    if (typeof window === "undefined") return;
 
+    const token = localStorage.getItem("access_token");
 
-    if(!token){
-
+    if (!token || token === "null" || token === "undefined") {
       throw redirect({
-        to:"/login"
+        to: "/login",
       });
-
     }
 
   },
@@ -91,51 +87,68 @@ function ChatPage() {
   const navigate = useNavigate();
 
 
-  const handleLogout = async () => {
+  const handleLogout = async()=>{
 
-    try {
+    try{
+
       await logout();
 
-    } catch(error) {
-      console.error(error);
+    }catch(e){
 
-    } finally {
+      console.error(e);
 
-      clearUserChats(); // remove current user's chats
+    }finally{
+
 
       clearAuth();
 
+
       navigate({
-        to: "/login",
+        to:"/",
         replace:true
       });
 
     }
+
   };
 
-  const [conversations, setConversations] = useState<Conversation[]>(() => {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+
+
+  useEffect(()=>{
 
     const saved = loadChats();
 
-    return saved.length
-      ? saved
-      : [newConversation()];
+    setConversations(
+      saved.length
+        ? saved
+        : [newConversation()]
+    );
 
-  });
 
-  const [activeId, setActiveId] = useState(() => {
+  },[]);
+
+  const [activeId,setActiveId] = useState("");
+
+  useEffect(()=>{
 
     const userId = getCurrentUserId();
 
-    if (!userId) return "";
+    if(!userId) return;
 
-    return (
+
+    const saved =
       localStorage.getItem(
         `serenity_active_${userId}`
-      ) || ""
-    );
+      );
 
-  });
+
+    if(saved){
+      setActiveId(saved);
+    }
+
+
+  },[]);
 
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -147,7 +160,9 @@ function ChatPage() {
 
 
   const active =
-    conversations.find((c) => c.id === activeId) ?? conversations[0];
+    conversations.find(c=>c.id===activeId)
+    || conversations[0]
+    || null;
 
 
 
@@ -163,11 +178,22 @@ function ChatPage() {
     setConversations((cs) => cs.map((c) => (c.id === activeId ? updater(c) : c)));
   };
 
+  const initialized = useRef(false);
+
+
   useEffect(()=>{
 
-  saveChats(conversations);
+    if(!initialized.current){
+      initialized.current=true;
+      return;
+    }
+
+
+    saveChats(conversations);
+
 
   },[conversations]);
+
 
   useEffect(()=>{
 

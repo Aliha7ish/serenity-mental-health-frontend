@@ -1,66 +1,60 @@
 import type { Conversation } from "@/routes/chat";
 
 
-export function getCurrentUserId() {
-  try {
-    const user = JSON.parse(
-      localStorage.getItem("user") || "null"
-    );
+const CHAT_PREFIX = "serenity_chats_";
 
-    return user?.id ?? null;
 
-  } catch {
-    return null;
-  }
+export function getCurrentUserId(){
+
+  const user = JSON.parse(
+    localStorage.getItem("user") || "null"
+  );
+
+  return user?.id ?? null;
 }
 
 
 
-export function getChatKey() {
+function getKey(){
 
-  const userId = getCurrentUserId();
+  const id = getCurrentUserId();
 
-  if (!userId) return null;
+  if(!id) return null;
 
-  return `serenity_chats_${userId}`;
+  return `${CHAT_PREFIX}${id}`;
+
 }
 
 
 
-export function loadChats(): Conversation[] {
-
-  const key = getChatKey();
-
-  if (!key) {
-    return [];
-  }
-
+export function loadChats(){
 
   try {
 
-    const saved = localStorage.getItem(key);
+    const key = getKey();
 
-    if (!saved) {
-      return [];
-    }
+    if(!key) return [];
 
-    return JSON.parse(saved);
+    const data = localStorage.getItem(key);
+
+    return data ? JSON.parse(data) : [];
 
   } catch {
 
-    localStorage.removeItem(key);
     return [];
 
   }
+
 }
 
 
 
-export function saveChats(chats: Conversation[]) {
+export function saveChats(chats:any[]){
 
-  const key = getChatKey();
+  const key = getKey();
 
-  if (!key) return;
+  if(!key) return;
+
 
   localStorage.setItem(
     key,
@@ -71,12 +65,19 @@ export function saveChats(chats: Conversation[]) {
 
 
 
-export function clearUserChats() {
+export function clearUserChats(){
 
-  const key = getChatKey();
+  const id = getCurrentUserId();
 
-  if (key) {
-    localStorage.removeItem(key);
-  }
+  if(!id) return;
+
+
+  localStorage.removeItem(
+    `${CHAT_PREFIX}${id}`
+  );
+
+  localStorage.removeItem(
+    `serenity_active_${id}`
+  );
 
 }
