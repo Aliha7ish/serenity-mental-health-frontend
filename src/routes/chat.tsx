@@ -22,6 +22,7 @@ import serenityIcon from "@/assets/serenity-icon.png";
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { isAuthenticated } from "@/lib/auth";
+import { useNavigate } from "@tanstack/react-router";
 
 
 export const Route = createFileRoute("/chat")({
@@ -81,12 +82,41 @@ function newConversation(): Conversation {
 
 function ChatPage() {
 
+  const navigate = useNavigate();
+  const [checkedAuth, setCheckedAuth] = useState(false);
+
   const [conversations, setConversations] = useState<Conversation[]>(() => {
-    const c = newConversation();
-    return [c];
+    const saved = localStorage.getItem("serenity_conversations");
+
+    if (saved) {
+      return JSON.parse(saved);
+    }
+
+    return [newConversation()];
   });
 
-  const [activeId, setActiveId] = useState("");
+  const [activeId, setActiveId] = useState(() => {
+    return localStorage.getItem("serenity_active_chat") || "";
+  });
+
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate({
+        to: "/login",
+        replace: true,
+      });
+      return;
+    }
+
+    setCheckedAuth(true);
+  }, [navigate]);
+
+  if (!checkedAuth) {
+    return null;
+  }
+
+
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -94,14 +124,6 @@ function ChatPage() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-
-  // initialize active conversation
-  useEffect(() => {
-    if (!activeId && conversations.length > 0) {
-      setActiveId(conversations[0].id);
-    }
-  }, [conversations, activeId]);
 
 
   const active =
@@ -118,6 +140,31 @@ function ChatPage() {
   const updateActive = (updater: (c: Conversation) => Conversation) => {
     setConversations((cs) => cs.map((c) => (c.id === activeId ? updater(c) : c)));
   };
+
+  useEffect(() => {
+    localStorage.setItem(
+      "serenity_conversations",
+      JSON.stringify(conversations)
+    );
+  }, [conversations]);
+
+  useEffect(() => {
+    if (activeId) {
+      localStorage.setItem(
+        "serenity_active_chat",
+        activeId
+      );
+    }
+  }, [activeId]);
+
+  useEffect(() => {
+    if (
+      !activeId ||
+      !conversations.some(c => c.id === activeId)
+    ) {
+      setActiveId(conversations[0]?.id ?? "");
+    }
+  }, [conversations, activeId]);
 
   const send = async (text: string) => {
     const trimmed = text.trim();
