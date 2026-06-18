@@ -26,10 +26,10 @@ import { useNavigate } from "@tanstack/react-router";
 
 
 export const Route = createFileRoute("/chat")({
-  beforeLoad: async () => {
-    const authenticated = isAuthenticated();
+  beforeLoad: () => {
+    if (typeof window === "undefined") return;
 
-    if (!authenticated) {
+    if (!localStorage.getItem("access_token")) {
       throw redirect({
         to: "/login",
       });
@@ -82,9 +82,6 @@ function newConversation(): Conversation {
 
 function ChatPage() {
 
-  const navigate = useNavigate();
-  const [checkedAuth, setCheckedAuth] = useState(false);
-
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const saved = localStorage.getItem("serenity_conversations");
 
@@ -99,24 +96,6 @@ function ChatPage() {
     return localStorage.getItem("serenity_active_chat") || "";
   });
 
-
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate({
-        to: "/login",
-        replace: true,
-      });
-      return;
-    }
-
-    setCheckedAuth(true);
-  }, [navigate]);
-
-  if (!checkedAuth) {
-    return null;
-  }
-
-
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -128,6 +107,8 @@ function ChatPage() {
 
   const active =
     conversations.find((c) => c.id === activeId) ?? conversations[0];
+
+
 
   useEffect(() => {
     textareaRef.current?.focus();
