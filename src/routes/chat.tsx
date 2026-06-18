@@ -21,38 +21,40 @@ import sunflower from "@/assets/sunflower.png";
 import serenityIcon from "@/assets/serenity-icon.png";
 import { logout } from "@/lib/api/auth.functions";
 import { clearAuth } from "@/lib/auth";
+import { clearUserChats } from "@/lib/chatStorage";
 import { useNavigate } from "@tanstack/react-router";
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
-
+import {
+  loadChats,
+  saveChats,
+  getCurrentUserId
+  } from "@/lib/chatStorage";
 
 export const Route = createFileRoute("/chat")({
-  beforeLoad: () => {
-    const token = localStorage.getItem("access_token");
 
-    if (
-      !token ||
-      token === "null" ||
-      token === "undefined"
-    ) {
+  beforeLoad: () => {
+
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("access_token")
+        : null;
+
+
+    if(!token){
+
       throw redirect({
-        to: "/login",
+        to:"/login"
       });
+
     }
+
   },
 
-  head: () => ({
-    meta: [
-      { title: "Chat — Serenity" },
-      {
-        name: "description",
-        content: "A calm, safe space to talk through what you're feeling.",
-      },
-    ],
-  }),
+  component:ChatPage
 
-  component: ChatPage,
 });
+
 
 type Message = {
   id: string;
@@ -85,16 +87,6 @@ function newConversation(): Conversation {
   };
 }
 
-function getStorageKey() {
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-
-    if (!user?.id) {
-      return null;
-    }
-
-    return `serenity_conversations_${user.id}`;
-  }
-
 function ChatPage() {
   const navigate = useNavigate();
 
@@ -102,51 +94,47 @@ function ChatPage() {
   const handleLogout = async () => {
 
     try {
-
       await logout();
 
     } catch(error) {
-
-      console.error("Logout failed", error);
+      console.error(error);
 
     } finally {
+
+      clearUserChats(); // remove current user's chats
 
       clearAuth();
 
       navigate({
-        to: "/",
-        replace: true,
+        to: "/login",
+        replace:true
       });
 
     }
   };
 
   const [conversations, setConversations] = useState<Conversation[]>(() => {
-    const key = getStorageKey();
 
-    if (!key) {
-      return [newConversation()];
-    }
+    const saved = loadChats();
 
-    const saved = localStorage.getItem(key);
+    return saved.length
+      ? saved
+      : [newConversation()];
 
-    if (saved) {
-      return JSON.parse(saved);
-    }
-
-    return [newConversation()];
   });
 
   const [activeId, setActiveId] = useState(() => {
-    const user = JSON.parse(
-      localStorage.getItem("user") || "null"
-    );
+
+    const userId = getCurrentUserId();
+
+    if (!userId) return "";
 
     return (
       localStorage.getItem(
-        `serenity_active_chat_${user?.id}`
+        `serenity_active_${userId}`
       ) || ""
     );
+
   });
 
   const [input, setInput] = useState("");
@@ -175,32 +163,27 @@ function ChatPage() {
     setConversations((cs) => cs.map((c) => (c.id === activeId ? updater(c) : c)));
   };
 
-  useEffect(() => {
-    const key = getStorageKey();
+  useEffect(()=>{
 
-    if (!key) return;
+  saveChats(conversations);
 
-    localStorage.setItem(
-      key,
-      JSON.stringify(conversations)
-    );
+  },[conversations]);
 
-  }, [conversations]);
+  useEffect(()=>{
 
-  useEffect(() => {
+    const userId = getCurrentUserId();
 
-    const user = JSON.parse(
-      localStorage.getItem("user") || "null"
-    );
+    if(!userId || !activeId)
+      return;
 
-    if (!user?.id || !activeId) return;
 
     localStorage.setItem(
-      `serenity_active_chat_${user.id}`,
+      `serenity_active_${userId}`,
       activeId
     );
 
-  }, [activeId]);
+
+    },[activeId]);
 
   useEffect(() => {
     if (
@@ -458,12 +441,12 @@ function ChatPage() {
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
-          {active.messages.length === 0 ? (
+          {!active || active.messages.length === 0 ? (
             <EmptyState onPick={send} />
           ) : (
             <div className="mx-auto flex max-w-3xl flex-col gap-4">
               <AnimatePresence initial={false}>
-                {active.messages.map((m) => (
+                {active?.messages.map((m) => (
                   <MessageBubble key={m.id} message={m} />
                 ))}
               </AnimatePresence>
