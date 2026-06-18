@@ -1,3 +1,4 @@
+import { sendMessage } from "@/lib/api/chat.functions";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -68,15 +69,6 @@ const STARTERS = [
 
 const CRISIS_WORDS = ["suicide", "kill myself", "end my life", "hurt myself", "self harm"];
 
-function mockReplyFor(text: string): string {
-  const t = text.toLowerCase();
-  if (t.includes("anx")) return "I hear you. Anxiety can feel heavy. Let's slow it down together — can you tell me what's swirling in your mind right now?";
-  if (t.includes("overwhelm")) return "That sounds like a lot to carry. You don't need to solve everything at once. What feels heaviest today?";
-  if (t.includes("lonely")) return "I'm really glad you reached out. Loneliness is painful, and it doesn't mean anything is wrong with you. Tell me more about your day.";
-  if (t.includes("work") || t.includes("stress")) return "Work stress builds quietly. Let's name it together — what's one thing weighing on you most right now?";
-  return "Thank you for sharing that with me. I'm here, and we can take this at your pace. Would you like to explore it a little more?";
-}
-
 function newConversation(): Conversation {
   return {
     id: crypto.randomUUID(),
@@ -109,34 +101,97 @@ function ChatPage() {
     setConversations((cs) => cs.map((c) => (c.id === activeId ? updater(c) : c)));
   };
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed) return;
 
-    if (CRISIS_WORDS.some((w) => trimmed.toLowerCase().includes(w))) {
+    if (!trimmed || isTyping) return;
+
+
+    if (CRISIS_WORDS.some((w) => 
+        trimmed.toLowerCase().includes(w)
+    )) {
       setCrisis(true);
     }
 
-    const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: trimmed, at: Date.now() };
+
+    const userMsg: Message = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: trimmed,
+      at: Date.now(),
+    };
+
+
     updateActive((c) => ({
       ...c,
-      title: c.messages.length === 0 ? trimmed.slice(0, 40) : c.title,
-      messages: [...c.messages, userMsg],
+      title:
+        c.messages.length === 0
+          ? trimmed.slice(0, 40)
+          : c.title,
+
+      messages: [
+        ...c.messages,
+        userMsg
+      ],
     }));
+
+
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      const reply: Message = {
+
+    try {
+
+      const response = await sendMessage({
+        message: trimmed,
+      });
+
+
+      const assistantMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: mockReplyFor(trimmed),
+        content: response.response,
         at: Date.now(),
       };
-      updateActive((c) => ({ ...c, messages: [...c.messages, reply] }));
+
+
+      updateActive((c)=>({
+        ...c,
+        messages:[
+          ...c.messages,
+          assistantMsg
+        ]
+      }));
+
+
+    } catch(error){
+
+      console.error(error);
+
+
+      const errorMsg: Message = {
+        id: crypto.randomUUID(),
+        role:"assistant",
+        content:
+          "Sorry, I couldn't process your message. Please try again.",
+        at:Date.now()
+      };
+
+
+      updateActive((c)=>({
+        ...c,
+        messages:[
+          ...c.messages,
+          errorMsg
+        ]
+      }));
+
+    } finally {
+
       setIsTyping(false);
       textareaRef.current?.focus();
-    }, 1100);
+
+    }
   };
 
   const startNew = () => {

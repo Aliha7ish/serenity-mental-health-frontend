@@ -6,12 +6,17 @@ export interface ChatMessage {
 }
 
 
+export interface ChatResponse {
+    response:string;
+}
+
+
 
 export function sendMessage(
     data:ChatMessage
 ){
 
- return apiClient(
+ return apiClient<ChatResponse>(
    "/chat",
    {
     method:"POST",
