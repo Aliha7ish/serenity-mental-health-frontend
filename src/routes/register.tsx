@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import authBloom from "@/assets/auth-bloom.png";
+import Select from "react-select";
+import countryList from "react-select-country-list";
+import ReactCountryFlag from "react-country-flag";
+import { useMemo } from "react";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -90,6 +94,15 @@ function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+  
+  const countries = useMemo(
+  () =>
+    countryList().getData().map((country) => ({
+      value: country.value,
+      label: country.label,
+    })),
+  []
+);
 
   const update = (field: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -300,15 +313,57 @@ function RegisterPage() {
 
             <div className="space-y-2">
               <Label htmlFor="country">Country</Label>
-              <Input
-                id="country"
-                placeholder="United States"
-                value={form.country}
-                onChange={update("country")}
-                aria-invalid={!!errors.country}
-                className={`h-11 rounded-xl ${errors.country ? "border-destructive focus-visible:ring-destructive" : ""}`}
+
+              <Select
+                options={countries}
+                isSearchable
+                placeholder="Select your country"
+                value={
+                  countries.find(
+                    (country) => country.label === form.country
+                  ) || null
+                }
+                onChange={(selected) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    country: selected?.label || "",
+                  }));
+
+                  setErrors((prev) => {
+                    if (!prev.country) return prev;
+                    const next = { ...prev };
+                    delete next.country;
+                    return next;
+                  });
+                }}
+                formatOptionLabel={(country) => (
+                  <div className="flex items-center gap-3">
+                    <ReactCountryFlag
+                      countryCode={country.value}
+                      svg
+                      style={{
+                        width: "1.4em",
+                        height: "1.4em",
+                      }}
+                    />
+                    <span>{country.label}</span>
+                  </div>
+                )}
+                className="text-sm"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    minHeight: "44px",
+                    borderRadius: "12px",
+                  }),
+                }}
               />
-              {errors.country && <p className="text-xs text-destructive">{errors.country}</p>}
+
+              {errors.country && (
+                <p className="text-xs text-destructive">
+                  {errors.country}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
