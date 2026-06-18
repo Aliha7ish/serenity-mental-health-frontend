@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -20,13 +19,29 @@ import { Textarea } from "@/components/ui/textarea";
 import sunflower from "@/assets/sunflower.png";
 import serenityIcon from "@/assets/serenity-icon.png";
 
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { isAuthenticated } from "@/lib/auth";
+
+
 export const Route = createFileRoute("/chat")({
+  beforeLoad: () => {
+    if (!isAuthenticated()) {
+      throw redirect({
+        to: "/login",
+      });
+    }
+  },
+
   head: () => ({
     meta: [
       { title: "Chat — Serenity" },
-      { name: "description", content: "A calm, safe space to talk through what you're feeling." },
+      {
+        name: "description",
+        content: "A calm, safe space to talk through what you're feeling.",
+      },
     ],
   }),
+
   component: ChatPage,
 });
 
