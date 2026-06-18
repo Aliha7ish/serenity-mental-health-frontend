@@ -16,6 +16,21 @@ export function getUser() {
 }
 
 export function clearAuth() {
+
+  const user = getUser();
+
+  if (user?.id) {
+
+    localStorage.removeItem(
+      `serenity_conversations_${user.id}`
+    );
+
+    localStorage.removeItem(
+      `serenity_active_chat_${user.id}`
+    );
+  }
+
+
   localStorage.removeItem("access_token");
   localStorage.removeItem("user");
 }

@@ -19,8 +19,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import sunflower from "@/assets/sunflower.png";
 import serenityIcon from "@/assets/serenity-icon.png";
+import { logout } from "@/lib/api/auth.functions";
+import { clearAuth } from "@/lib/auth";
+import { useNavigate } from "@tanstack/react-router";
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
+
 
 export const Route = createFileRoute("/chat")({
   beforeLoad: () => {
@@ -81,10 +85,50 @@ function newConversation(): Conversation {
   };
 }
 
+function getStorageKey() {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+
+    if (!user?.id) {
+      return null;
+    }
+
+    return `serenity_conversations_${user.id}`;
+  }
+
 function ChatPage() {
+  const navigate = useNavigate();
+
+
+  const handleLogout = async () => {
+
+    try {
+
+      await logout();
+
+    } catch(error) {
+
+      console.error("Logout failed", error);
+
+    } finally {
+
+      clearAuth();
+
+      navigate({
+        to: "/",
+        replace: true,
+      });
+
+    }
+  };
 
   const [conversations, setConversations] = useState<Conversation[]>(() => {
-    const saved = localStorage.getItem("serenity_conversations");
+    const key = getStorageKey();
+
+    if (!key) {
+      return [newConversation()];
+    }
+
+    const saved = localStorage.getItem(key);
 
     if (saved) {
       return JSON.parse(saved);
@@ -94,7 +138,15 @@ function ChatPage() {
   });
 
   const [activeId, setActiveId] = useState(() => {
-    return localStorage.getItem("serenity_active_chat") || "";
+    const user = JSON.parse(
+      localStorage.getItem("user") || "null"
+    );
+
+    return (
+      localStorage.getItem(
+        `serenity_active_chat_${user?.id}`
+      ) || ""
+    );
   });
 
   const [input, setInput] = useState("");
@@ -124,19 +176,30 @@ function ChatPage() {
   };
 
   useEffect(() => {
+    const key = getStorageKey();
+
+    if (!key) return;
+
     localStorage.setItem(
-      "serenity_conversations",
+      key,
       JSON.stringify(conversations)
     );
+
   }, [conversations]);
 
   useEffect(() => {
-    if (activeId) {
-      localStorage.setItem(
-        "serenity_active_chat",
-        activeId
-      );
-    }
+
+    const user = JSON.parse(
+      localStorage.getItem("user") || "null"
+    );
+
+    if (!user?.id || !activeId) return;
+
+    localStorage.setItem(
+      `serenity_active_chat_${user.id}`,
+      activeId
+    );
+
   }, [activeId]);
 
   useEffect(() => {
@@ -326,10 +389,14 @@ function ChatPage() {
             <Button variant="ghost" size="sm" className="justify-start rounded-lg">
               <Settings className="h-4 w-4" /> Settings
             </Button>
-            <Button variant="ghost" size="sm" className="justify-start rounded-lg" asChild>
-              <Link to="/login">
-                <LogOut className="h-4 w-4" /> Logout
-              </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="justify-start rounded-lg"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
             </Button>
           </div>
         </div>
