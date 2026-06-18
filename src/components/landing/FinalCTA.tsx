@@ -2,8 +2,12 @@ import { motion } from "motion/react";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ctaBloom from "@/assets/cta-bloom.png";
+import { getUser } from "@/lib/auth";
+import { Link } from "@tanstack/react-router";
 
 export function FinalCTA() {
+  const user = getUser();
+
   return (
     <section aria-labelledby="cta-title" className="relative overflow-hidden py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-5">
@@ -42,14 +46,50 @@ export function FinalCTA() {
             </p>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <Button size="lg" className="h-12 rounded-full bg-white px-7 text-base font-semibold text-primary hover:bg-white/90">
-                Start free
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline" className="h-12 rounded-full border-2 border-white/70 bg-transparent px-7 text-base font-semibold text-white hover:bg-white/10 hover:text-white">
-                <MessageCircle className="mr-1 h-4 w-4" />
-                Talk to Serenity
-              </Button>
+
+              {user ? (
+
+                <Button
+                  size="lg"
+                  className="h-12 rounded-full bg-white px-7 text-base font-semibold text-primary hover:bg-white/90"
+                  asChild
+                >
+                  <Link to="/chat">
+                    Continue your journey
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+
+              ) : (
+
+                <>
+                  <Button
+                    size="lg"
+                    className="h-12 rounded-full bg-white px-7 text-base font-semibold text-primary hover:bg-white/90"
+                    asChild
+                  >
+                    <Link to="/register">
+                      Start free
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </Button>
+
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="h-12 rounded-full border-2 border-white/70 bg-transparent px-7 text-base font-semibold text-white hover:bg-white/10 hover:text-white"
+                    asChild
+                  >
+                    <Link to="/chat">
+                      <MessageCircle className="mr-1 h-4 w-4" />
+                      Talk to Serenity
+                    </Link>
+                  </Button>
+                </>
+
+              )}
+
             </div>
           </div>
         </div>

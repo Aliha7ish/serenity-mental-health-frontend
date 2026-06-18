@@ -3,8 +3,16 @@ import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBloom from "@/assets/hero-bloom.png";
 import sunflower from "@/assets/sunflower.png";
+import { getUser } from "@/lib/auth";
+import { Link } from "@tanstack/react-router";
 
 export function Hero() {
+  const user = getUser();
+
+  const heroText = user
+    ? `Welcome back ${user.full_name || user.username}. Serenity is here whenever you need a calm space to reflect, heal, and grow.`
+    : `Life can feel overwhelming at times. Serenity offers compassionate, confidential, and always-available emotional support to help you navigate every step of your journey.`;
+
   return (
     <section className="relative isolate overflow-hidden pt-32 pb-24 md:pt-40 md:pb-32">
       {/* Soft sunlight wash */}
@@ -59,10 +67,10 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground lg:mx-0"
           >
-            Life can feel overwhelming at times. Serenity offers compassionate, confidential, and always-available emotional support to help you navigate every step of your journey.
+            {heroText}
           </motion.p>
 
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
@@ -76,6 +84,65 @@ export function Hero() {
               <MessageCircle className="mr-1 h-4 w-4" />
               Talk to Serenity
             </Button>
+          </motion.div> */}
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="mt-9 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
+          >
+            {user ? (
+              <>
+                <Button
+                  size="lg"
+                  className="h-12 rounded-full bg-gradient-bloom px-7 text-base font-semibold text-white shadow-petal hover:opacity-90"
+                  asChild
+                >
+                  <Link to="/chat">
+                    Continue your journey
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-12 rounded-full border-2 px-7 text-base font-semibold"
+                  asChild
+                >
+                  <Link to="/chat">
+                    <MessageCircle className="mr-1 h-4 w-4" />
+                    Talk to Serenity
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  size="lg"
+                  className="h-12 rounded-full bg-gradient-bloom px-7 text-base font-semibold text-white shadow-petal hover:opacity-90"
+                  asChild
+                >
+                  <Link to="/register">
+                    Start your journey
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-12 rounded-full border-2 px-7 text-base font-semibold"
+                  asChild
+                >
+                  <Link to="/chat">
+                    <MessageCircle className="mr-1 h-4 w-4" />
+                    Talk to Serenity
+                  </Link>
+                </Button>
+              </>
+            )}
           </motion.div>
 
           <motion.div
