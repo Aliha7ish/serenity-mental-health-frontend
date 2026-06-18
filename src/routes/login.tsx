@@ -9,11 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import authBloom from "@/assets/auth-bloom.png";
 
-const navigate = useNavigate();
-
-const [error,setError] = useState("");
-const [loading,setLoading] = useState(false);
-
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
@@ -52,6 +47,10 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
+
+  const [error,setError] = useState("");
+  const [loading,setLoading] = useState(false);
 
   const handleSubmit = async(e:React.FormEvent)=>{
 
@@ -64,7 +63,7 @@ function LoginPage() {
     try{
 
         const response = await login({
-            username: email,
+            email: email,
             password
         });
 
@@ -275,7 +274,7 @@ function LoginPage() {
               {error}
             </p>
             )}
-            
+
         </div>
       </div>
     </div>
