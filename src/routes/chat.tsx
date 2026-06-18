@@ -35,15 +35,17 @@ import { isAuthenticated } from "@/lib/auth";
 
 export const Route = createFileRoute("/chat")({
 
-  beforeLoad: () => {
+  beforeLoad: ({context}) => {
 
-    if(!isAuthenticated()){
+
+    if(!context.auth.isAuthenticated()) {
 
       throw redirect({
         to:"/login",
       });
 
     }
+
 
   },
 
