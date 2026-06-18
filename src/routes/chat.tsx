@@ -21,9 +21,6 @@ import sunflower from "@/assets/sunflower.png";
 import serenityIcon from "@/assets/serenity-icon.png";
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { isAuthenticated } from "@/lib/auth";
-import { useNavigate } from "@tanstack/react-router";
-
 
 export const Route = createFileRoute("/chat")({
   beforeLoad: () => {
