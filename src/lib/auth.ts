@@ -58,4 +58,9 @@ export function clearAuth() {
 
   localStorage.removeItem("access_token");
   localStorage.removeItem("user");
+
+
+  window.dispatchEvent(
+    new Event("auth-change")
+  );
 }

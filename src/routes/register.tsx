@@ -11,6 +11,7 @@ import Select from "react-select";
 import countryList from "react-select-country-list";
 import ReactCountryFlag from "react-country-flag";
 import { useMemo } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -85,6 +86,7 @@ function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<SubmitStatus>(null);
   const [errors, setErrors] = useState<FormErrors>({});
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormState>({
     firstName: "",
     lastName: "",
@@ -158,6 +160,12 @@ function RegisterPage() {
     // optional:
     // navigate to login page after success
     // router.navigate({to:"/login"})
+    setTimeout(() => {
+      navigate({
+        to: "/login",
+        replace: true,
+      });
+    }, 1500);
 
 
   } catch (error) {

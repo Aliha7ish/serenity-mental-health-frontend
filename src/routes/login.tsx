@@ -81,7 +81,8 @@ function LoginPage() {
           "user",
           JSON.stringify({
             username: response.username,
-            full_name: response.full_name
+            full_name: response.full_name,
+            first_name: response.first_name
           })
         );
 

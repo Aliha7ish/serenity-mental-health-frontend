@@ -18,7 +18,28 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const [user, setUser] = useState(getUser());
+  const [user, setUser] = useState(() => getUser());
+
+  useEffect(()=>{
+
+    const updateUser = () => {
+      setUser(getUser());
+    };
+
+
+    window.addEventListener(
+      "auth-change",
+      updateUser
+    );
+
+
+    return () =>
+      window.removeEventListener(
+        "auth-change",
+        updateUser
+      );
+
+  },[]);
 
   const handleLogout = () => {
 

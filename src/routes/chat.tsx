@@ -31,7 +31,7 @@ import {
   } from "@/lib/chatStorage";
 
 import { isAuthenticated } from "@/lib/auth";
-
+import { sendVoice } from "@/lib/api/voice.functions";
 
 export const Route = createFileRoute("/chat")({
 
@@ -66,6 +66,13 @@ type Conversation = {
   id: string;
   title: string;
   messages: Message[];
+};
+
+type VoiceResponse = {
+  response:string;
+  transcribed_text?: string;
+  voice_language?: string | null;
+  input_type?: string;
 };
 
 const STARTERS = [
@@ -151,6 +158,10 @@ function ChatPage() {
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [crisis, setCrisis] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -298,6 +309,166 @@ function ChatPage() {
       textareaRef.current?.focus();
 
     }
+  };
+
+  const startRecording = async()=>{
+
+    try{
+
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          audio:true
+        });
+
+
+      const recorder =
+        new MediaRecorder(stream);
+
+
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+
+      recorder.ondataavailable = (event)=>{
+
+        if(event.data.size > 0){
+          audioChunksRef.current.push(event.data);
+        }
+
+      };
+
+
+      recorder.onstop = async()=>{
+
+
+        const audioBlob =
+          new Blob(
+            audioChunksRef.current,
+            {
+              type:"audio/webm"
+            }
+          );
+
+
+        stream
+          .getTracks()
+          .forEach(track=>track.stop());
+
+
+        await sendVoiceMessage(audioBlob);
+
+      };
+
+
+      recorder.start();
+
+      setIsRecording(true);
+
+
+    }catch(error){
+
+      console.error(
+        "Microphone error:",
+        error
+      );
+
+    }
+
+  };
+
+
+
+  const stopRecording = ()=>{
+
+    if(mediaRecorderRef.current){
+
+      mediaRecorderRef.current.stop();
+
+      setIsRecording(false);
+
+    }
+
+  };
+
+
+
+  const sendVoiceMessage = async(audioBlob:Blob)=>{
+
+    setIsTyping(true);
+
+    try{
+
+      const response: VoiceResponse = await sendVoice(audioBlob);
+
+
+      // Add transcript immediately
+      const userMsg: Message = {
+        id: crypto.randomUUID(),
+        role:"user",
+        content: response.transcribed_text || "Voice message",
+        at:Date.now(),
+      };
+
+
+      updateActive(c=>({
+        ...c,
+        title:
+          c.messages.length === 0
+            ? (response.transcribed_text?.slice(0,40) || "Voice message")
+            : c.title,
+
+        messages:[
+          ...c.messages,
+          userMsg
+        ]
+      }));
+
+
+      // keep typing bubble visible while generating response
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+
+      const assistantMsg:Message = {
+        id:crypto.randomUUID(),
+        role:"assistant",
+        content:response.response,
+        at:Date.now()
+      };
+
+
+      updateActive(c=>({
+        ...c,
+        messages:[
+          ...c.messages,
+          assistantMsg
+        ]
+      }));
+
+
+    }catch(error){
+
+      console.error(error);
+
+      updateActive(c=>({
+        ...c,
+        messages:[
+          ...c.messages,
+          {
+            id:crypto.randomUUID(),
+            role:"assistant",
+            content:"Sorry, I couldn't understand your voice. Please try again.",
+            at:Date.now()
+          }
+        ]
+      }));
+
+    }finally{
+
+      setIsTyping(false);
+      textareaRef.current?.focus();
+
+    }
+
   };
 
   const startNew = () => {
@@ -495,11 +666,32 @@ function ChatPage() {
               type="button"
               variant="ghost"
               size="icon"
-              className="shrink-0 rounded-full text-muted-foreground"
-              aria-label="Voice input (coming soon)"
-              disabled
+              className={`shrink-0 rounded-full ${
+                isRecording
+                  ? "bg-red-500 text-white"
+                  : "text-muted-foreground"
+              }`}
+              aria-label="Voice input"
+              onClick={
+                isTyping
+                  ? undefined
+                  : (
+                    isRecording
+                      ? stopRecording
+                      : startRecording
+                  )
+              }
+              disabled={isTyping}
             >
-              <Mic className="h-4 w-4" />
+
+              <Mic
+                className={`h-4 w-4 ${
+                  isRecording
+                    ? "animate-pulse"
+                    : ""
+                }`}
+              />
+
             </Button>
             <Button
               type="submit"
