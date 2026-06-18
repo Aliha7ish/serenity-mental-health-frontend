@@ -25,8 +25,10 @@ import { isAuthenticated } from "@/lib/auth";
 
 
 export const Route = createFileRoute("/chat")({
-  beforeLoad: () => {
-    if (!isAuthenticated()) {
+  beforeLoad: async () => {
+    const authenticated = isAuthenticated();
+
+    if (!authenticated) {
       throw redirect({
         to: "/login",
       });
@@ -78,16 +80,32 @@ function newConversation(): Conversation {
 }
 
 function ChatPage() {
-  const [conversations, setConversations] = useState<Conversation[]>(() => [newConversation()]);
-  const [activeId, setActiveId] = useState(() => conversations[0].id);
+
+  const [conversations, setConversations] = useState<Conversation[]>(() => {
+    const c = newConversation();
+    return [c];
+  });
+
+  const [activeId, setActiveId] = useState("");
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [crisis, setCrisis] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const active = conversations.find((c) => c.id === activeId) ?? conversations[0];
+
+  // initialize active conversation
+  useEffect(() => {
+    if (!activeId && conversations.length > 0) {
+      setActiveId(conversations[0].id);
+    }
+  }, [conversations, activeId]);
+
+
+  const active =
+    conversations.find((c) => c.id === activeId) ?? conversations[0];
 
   useEffect(() => {
     textareaRef.current?.focus();
