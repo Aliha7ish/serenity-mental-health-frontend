@@ -6,7 +6,7 @@ import {
 import { routeTree } from "./routeTree.gen";
 import { isAuthenticated } from "@/lib/auth";
 
-// 
+// hello
 
 import type { RouterContext } from "./router-context";
 
