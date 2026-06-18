@@ -27,9 +27,13 @@ import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/chat")({
   beforeLoad: () => {
-    if (typeof window === "undefined") return;
+    const token = localStorage.getItem("access_token");
 
-    if (!localStorage.getItem("access_token")) {
+    if (
+      !token ||
+      token === "null" ||
+      token === "undefined"
+    ) {
       throw redirect({
         to: "/login",
       });
