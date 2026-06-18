@@ -18,11 +18,13 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const user = getUser();
+  const [user, setUser] = useState(getUser());
 
   const handleLogout = () => {
 
     clearAuth();
+
+    setUser(null); // update navbar immediately
 
     navigate({
       to:"/"
