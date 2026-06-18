@@ -1,33 +1,58 @@
+export function getToken() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const token = localStorage.getItem("access_token");
+
+  if (
+    !token ||
+    token === "null" ||
+    token === "undefined"
+  ) {
+    return null;
+  }
+
+  return token;
+}
+
+
 export function isAuthenticated() {
+  return Boolean(getToken());
+}
+
+
+export function getUser() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
   try {
-    const token = localStorage.getItem("access_token");
-    return Boolean(token);
+
+    const user = localStorage.getItem("user");
+
+    return user ? JSON.parse(user) : null;
+
   } catch {
-    return false;
+    return null;
   }
 }
 
-export function getUser() {
-  const user = localStorage.getItem("user");
-
-  if (!user) return null;
-
-  return JSON.parse(user);
-}
 
 export function clearAuth() {
 
   const user = getUser();
 
-  if (user?.id) {
+  if(user?.id){
 
     localStorage.removeItem(
       `serenity_conversations_${user.id}`
     );
 
     localStorage.removeItem(
-      `serenity_active_chat_${user.id}`
+      `serenity_active_${user.id}`
     );
+
   }
 
 

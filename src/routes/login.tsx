@@ -87,7 +87,7 @@ function LoginPage() {
 
 
         navigate({
-            to:"/chat"
+            to:"/"
         });
 
 
@@ -95,7 +95,7 @@ function LoginPage() {
 
         setError(
             err?.message ||
-            "Invalid credentials"
+            "Invalid email or password! Please try again..."
         );
 
 

@@ -21,7 +21,6 @@ import sunflower from "@/assets/sunflower.png";
 import serenityIcon from "@/assets/serenity-icon.png";
 import { logout } from "@/lib/api/auth.functions";
 import { clearAuth } from "@/lib/auth";
-import { clearUserChats } from "@/lib/chatStorage";
 import { useNavigate } from "@tanstack/react-router";
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -31,23 +30,25 @@ import {
   getCurrentUserId
   } from "@/lib/chatStorage";
 
+import { isAuthenticated } from "@/lib/auth";
+
+
 export const Route = createFileRoute("/chat")({
 
   beforeLoad: () => {
 
-    if (typeof window === "undefined") return;
+    if(!isAuthenticated()){
 
-    const token = localStorage.getItem("access_token");
-
-    if (!token || token === "null" || token === "undefined") {
       throw redirect({
-        to: "/login",
+        to:"/login",
       });
+
     }
 
   },
 
-  component:ChatPage
+
+  component: ChatPage
 
 });
 
@@ -112,21 +113,15 @@ function ChatPage() {
 
   };
 
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-
-
-  useEffect(()=>{
-
+  const [conversations,setConversations] = useState<Conversation[]>(()=>{
+    
     const saved = loadChats();
 
-    setConversations(
-      saved.length
-        ? saved
-        : [newConversation()]
-    );
+    return saved.length
+      ? saved
+      : [newConversation()];
 
-
-  },[]);
+  });
 
   const [activeId,setActiveId] = useState("");
 
@@ -178,19 +173,9 @@ function ChatPage() {
     setConversations((cs) => cs.map((c) => (c.id === activeId ? updater(c) : c)));
   };
 
-  const initialized = useRef(false);
-
-
   useEffect(()=>{
 
-    if(!initialized.current){
-      initialized.current=true;
-      return;
-    }
-
-
     saveChats(conversations);
-
 
   },[conversations]);
 
